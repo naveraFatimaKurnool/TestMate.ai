@@ -74,6 +74,36 @@
   gap: 10px;
 }
 
+.recommendation-card .view-recommendation { width: 100%; }
+
+.recommendation-detail { margin: 18px 0; }
+.rec-detail-card { display: flex; gap: 14px; align-items: flex-start; padding: 16px; border-radius: 14px; background: #fff; border: 1px solid var(--border); box-shadow: var(--shadow-soft) }
+.rec-detail-image { width: 160px; height: 120px; background: linear-gradient(135deg,#f3f4f6,#fff); border-radius: 10px; background-image: url('/assets/food-placeholder.jpg'); background-size: cover; background-position: center }
+.rec-detail-body h3 { margin: 0; }
+.rec-sub { margin: 6px 0; color: var(--muted) }
+.rec-tags { display: flex; gap: 8px; margin: 8px 0 }
+.tag { background: rgba(15,23,42,0.06); padding: 6px 8px; border-radius: 999px; font-weight: 700; font-size: 0.82rem }
+.rec-ctas { display: flex; gap: 10px; margin-top: 12px }
+
+/* Pipeline evidence: make steps more compact and subtle */
+.pipeline-step { padding: 12px; min-height: 140px; }
+.pipeline-step h3 { font-size: 0.95rem }
+.pipeline-track { gap: 10px }
+
+/* Chat improvements */
+.chat-card { padding: 18px }
+.chat-messages { max-height: 320px }
+.chat-message { padding: 10px 12px }
+.chat-input { padding: 12px 14px; border-radius: 14px }
+
+/* Floating chat CTA */
+.floating-chat { position: fixed; right: 20px; bottom: 20px; background: linear-gradient(135deg,var(--accent),var(--accent-strong)); color: #fff; padding: 12px 14px; border-radius: 999px; box-shadow: 0 10px 30px rgba(0,0,0,0.15); border: none }
+
+@media (max-width: 640px) {
+  .rec-detail-card { flex-direction: column }
+  .rec-detail-image { width: 100%; height: 160px }
+}
+
 .match-row {
   display: flex;
   align-items: center;

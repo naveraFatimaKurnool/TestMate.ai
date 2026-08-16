@@ -115,6 +115,7 @@ function App() {
   const [chatInput, setChatInput] = useState('')
   const [chatSending, setChatSending] = useState(false)
   const [lastSnapshot, setLastSnapshot] = useState(null)
+  const [showRecommendationDetail, setShowRecommendationDetail] = useState(false)
 
   function updateAgentStatus(agentName, status) {
     setAgentStatuses((current) => ({
@@ -511,7 +512,7 @@ function App() {
                   </p>
 
                   <div className="rec-actions">
-                    <button className="view-recommendation">View Recommendation</button>
+                    <button className="view-recommendation" onClick={() => setShowRecommendationDetail((s) => !s)}>{showRecommendationDetail ? 'Hide' : 'View Recommendation'}</button>
                   </div>
                 </>
               ) : (
@@ -525,6 +526,39 @@ function App() {
           </div>
         </div>
       </section>
+
+      {showRecommendationDetail && (hasSamBrief || hasDanielBrief) ? (
+        <section className="recommendation-detail">
+          <div className="rec-detail-card">
+            <div className="rec-detail-image" aria-hidden>
+              {/* placeholder image */}
+            </div>
+
+            <div className="rec-detail-body">
+              <h3>{samBrief?.restaurant || danielBrief?.restaurant || 'The Spice Garden'}</h3>
+              <p className="rec-sub">{samBrief?.dish || danielBrief?.dish || 'Chicken Tikka Bowl'}</p>
+
+              <div className="rec-tags">
+                <span className="tag">Thai</span>
+                <span className="tag">Spicy</span>
+                <span className="tag">Under $15</span>
+              </div>
+
+              <h4>Why we recommend this</h4>
+              <ul>
+                {(samBrief?.reasons || danielBrief?.reasons || ['Matches cuisine preference','Within budget','High recent satisfaction']).map((r, i) => (
+                  <li key={i}>{typeof r === 'string' ? r : JSON.stringify(r)}</li>
+                ))}
+              </ul>
+
+              <div className="rec-ctas">
+                <button className="view-recommendation">Open in app</button>
+                <button className="ghost" onClick={() => setShowRecommendationDetail(false)}>Close</button>
+              </div>
+            </div>
+          </div>
+        </section>
+      ) : null}
 
       {/* =========================================================
           PIPELINE
