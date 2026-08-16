@@ -78,7 +78,7 @@
 
 .recommendation-detail { margin: 18px 0; }
 .rec-detail-card { display: flex; gap: 14px; align-items: flex-start; padding: 16px; border-radius: 14px; background: #fff; border: 1px solid var(--border); box-shadow: var(--shadow-soft) }
-.rec-detail-image { width: 160px; height: 120px; background: linear-gradient(135deg,#f3f4f6,#fff); border-radius: 10px; background-image: url('/assets/food-placeholder.jpg'); background-size: cover; background-position: center }
+.rec-detail-image { width: 160px; height: 120px; background: linear-gradient(135deg,#f3f4f6,#fff); border-radius: 10px; background-image: url('/assets/food-placeholder.svg'); background-size: cover; background-position: center }
 .rec-detail-body h3 { margin: 0; }
 .rec-sub { margin: 6px 0; color: var(--muted) }
 .rec-tags { display: flex; gap: 8px; margin: 8px 0 }
