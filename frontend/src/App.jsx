@@ -440,6 +440,19 @@ function App() {
 
   return (
     <main className="dashboard-shell">
+      <header className="site-header">
+        <div className="site-brand">
+          <h2>TasteMate AI</h2>
+          <p className="site-tag">Personalised dining recommendations</p>
+        </div>
+
+        <nav className="site-nav">
+          <a href="#">Dashboard</a>
+          <a href="#how">How it works</a>
+          <a href="#docs">Docs</a>
+          <button className="ghost" onClick={() => window.scrollTo(0, document.body.scrollHeight)}>AI Chat</button>
+        </nav>
+      </header>
       {/* =========================================================
           HERO
       ========================================================= */}
@@ -516,6 +529,23 @@ function App() {
       {/* =========================================================
           PIPELINE
       ========================================================= */}
+
+      <div className="kpi-row">
+        <div className="kpi-card">
+          <p className="kpi-label">Customers</p>
+          <p className="kpi-value">{lastSnapshot?.customers ?? (mayaBrief?.customers?.length ?? '—')}</p>
+        </div>
+
+        <div className="kpi-card">
+          <p className="kpi-label">Menu items</p>
+          <p className="kpi-value">{lastSnapshot?.menu ?? (mayaBrief?.menu?.length ?? '—')}</p>
+        </div>
+
+        <div className="kpi-card">
+          <p className="kpi-label">Orders</p>
+          <p className="kpi-value">{lastSnapshot?.orders ?? '—'}</p>
+        </div>
+      </div>
 
       <section
         className="pipeline-panel"

@@ -27,6 +27,32 @@
     linear-gradient(180deg, rgba(255,255,255,0.75), rgba(250,250,252,0.6));
 }
 
+/* Header */
+.site-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.site-brand h2 { margin: 0; font-size: 1.25rem; }
+.site-tag { margin: 0; color: var(--muted); font-size: 0.9rem }
+
+.site-nav {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+}
+
+.site-nav a { color: var(--muted-strong); text-decoration: none; font-weight: 600 }
+.site-nav .ghost { background: transparent; border: 1px solid rgba(15,23,42,0.06); padding: 8px 12px; border-radius: 10px }
+
+/* KPI row */
+.kpi-row { display: flex; gap: 12px; margin-bottom: 18px }
+.kpi-card { padding: 14px; border-radius: 12px; background: var(--panel-bg); border: 1px solid var(--border); min-width: 120px; box-shadow: var(--shadow-soft); }
+.kpi-label { margin: 0; font-size: 0.78rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.12em }
+.kpi-value { margin: 6px 0 0; font-size: 1.35rem; font-weight: 800; color: var(--text-strong) }
+
 /* Product hero specifics */
 .product-hero .muted {
   color: var(--muted);
