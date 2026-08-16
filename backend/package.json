@@ -1,0 +1,17 @@
+{
+  "name": "tastemate-ai-backend",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/client": "^2.0.0",
+    "@modelcontextprotocol/server": "^2.0.0",
+    "dotenv": "^17.4.2",
+    "groq-sdk": "^1.5.0",
+    "openai": "^7.4.0",
+    "zod": "^4.4.3"
+  }
+}
