@@ -444,42 +444,72 @@ function App() {
           HERO
       ========================================================= */}
 
-      <section className="hero-panel">
+      <section className="hero-panel product-hero">
         <div className="brand-block">
           <p className="eyebrow">TasteMate AI</p>
 
-          <h1>Agentic Customer Engagement Platform</h1>
+          <h1>Find your perfect dining experience</h1>
 
           <p className="lead">
-            A Human-Centred AI workflow where five specialized agents
-            collaborate sequentially to transform customer data into
-            actionable restaurant recommendations.
+            AI-powered, personalised restaurant and dish recommendations based on
+            customer preferences, orders and feedback — explained in plain language.
           </p>
+
+          <p className="muted">Customer preferences → AI analysis → personalised recommendation</p>
         </div>
 
         <div className="hero-actions">
-          <button
-            type="button"
-            className="run-button"
-            onClick={handleRunTasteMateAI}
-            disabled={isRunning}
-          >
-            {isRunning
-              ? 'TasteMate AI Running...'
-              : workflowStatus === 'complete'
-                ? 'Run Again'
-                : 'Run TasteMate AI'}
-          </button>
+          <div className="hero-cta">
+            <button
+              type="button"
+              className="run-button"
+              onClick={handleRunTasteMateAI}
+              disabled={isRunning}
+            >
+              {isRunning
+                ? 'Running TasteMate AI...'
+                : workflowStatus === 'complete'
+                  ? 'Run Again'
+                  : 'Explore Recommendations'}
+            </button>
 
-          <p className="button-note">
-            {workflowStatus === 'running'
-              ? 'The five-agent workflow is running sequentially.'
-              : workflowStatus === 'complete'
-                ? 'All five agents completed successfully.'
-                : workflowStatus === 'error'
-                  ? 'The workflow stopped because an agent encountered an error.'
-                  : 'Click to start the sequential AI workflow.'}
-          </p>
+            <p className="button-note">
+              {workflowStatus === 'running'
+                ? 'Generating a personalised recommendation — this may take a few seconds.'
+                : workflowStatus === 'complete'
+                  ? 'A recommendation is ready. See the preview below.'
+                  : 'Start the pipeline to generate a recommendation.'}
+            </p>
+          </div>
+
+          <div className="hero-preview">
+            <div className="recommendation-card">
+              {hasSamBrief || hasDanielBrief ? (
+                <>
+                  <div className="match-row">
+                    <div className="match-badge">94%</div>
+                    <div className="match-label">AI Match</div>
+                  </div>
+
+                  <h3 className="rec-title">Recommended for you</h3>
+
+                  <p className="rec-summary">
+                    {samBrief?.summary || danielBrief?.summary || 'A personalised restaurant suggestion based on your preferences.'}
+                  </p>
+
+                  <div className="rec-actions">
+                    <button className="view-recommendation">View Recommendation</button>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <p className="placeholder-label">Preview</p>
+                  <h3 className="rec-title">Your personalised recommendation will appear here</h3>
+                  <p className="rec-summary">Run the TasteMate pipeline to see a recommended restaurant or dish with an AI match score and clear explanation.</p>
+                </>
+              )}
+            </div>
+          </div>
         </div>
       </section>
 
