@@ -1,7 +1,5 @@
-import OpenAI from 'openai'
-import { Client } from '@modelcontextprotocol/client'
-import { StdioClientTransport, getDefaultEnvironment } from '@modelcontextprotocol/client/stdio'
 import { fileURLToPath } from 'node:url'
+import { fetchLiveSheetData } from '../lib/googleSheets.js'
 
 const chatbotMetadata = {
   id: 'nora',
@@ -11,9 +9,9 @@ const chatbotMetadata = {
     'Answers project questions using a live MCP tool that reads the restaurant Google Sheets data.',
 }
 
-const openai = process.env.OPENAI_API_KEY
-  ? new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
-  : null
+// We intentionally avoid using LLMs to fabricate answers.
+// Nora must answer strictly from live data. OpenAI usage is disabled for deterministic replies.
+const openai = null
 
 function getText(value) {
   if (value === null || value === undefined) {
@@ -147,54 +145,214 @@ export async function getChatbotReply({ message, messages = [] } = {}) {
   }
 
   const history = toMessageHistory(messages)
-  const { snapshot, toolName } = await loadLiveSnapshot(question)
 
-  const systemPrompt = `
-You are Nora, the MCP-connected TasteMate AI chatbot.
-You answer in a concise, helpful, product-minded tone.
-You must ground every answer in the live Google Sheets snapshot and the agent handoffs.
-If you mention live data, stay factual.
-If the user asks for a recommendation, prioritise the current customer signals and current workflow state.
-`
+  // Load full live sheet data for deterministic lookups
+  let liveData = null
+  let snapshot = {}
+  let toolName = 'live_dashboard_snapshot'
 
-  let reply = buildFallbackReply(question, snapshot)
-  let modelUsed = 'mcp-fallback'
+  try {
+    // load snapshot via MCP tool for metadata
+    const loaded = await loadLiveSnapshot(question)
+    snapshot = loaded.snapshot || {}
+  } catch (err) {
+    snapshot = {}
+  }
 
-  if (openai) {
-    const completion = await openai.chat.completions.create({
-      model: process.env.OPENAI_MODEL || 'gpt-4o-mini',
-      temperature: 0.4,
-      messages: [
-        { role: 'system', content: systemPrompt },
-        {
-          role: 'system',
-          content: `MCP snapshot:\n${JSON.stringify(snapshot, null, 2)}`,
-        },
-        ...history.slice(-6),
-        {
-          role: 'user',
-          content: question,
-        },
-      ],
-    })
+  try {
+    liveData = await fetchLiveSheetData(process.env.GOOGLE_SHEET_ID || '')
+  } catch (err) {
+    liveData = { customers: [], menu: [], orders: [], feedback: [] }
+  }
 
-    reply =
-      completion.choices?.[0]?.message?.content?.trim() || reply
-    modelUsed = process.env.OPENAI_MODEL || 'gpt-4o-mini'
+  // Deterministic answer helpers
+  function findCustomerById(id) {
+    if (!id) return null
+    const needle = String(id).trim().toLowerCase()
+    for (const row of liveData.customers || []) {
+      for (const value of Object.values(row || {})) {
+        if (String(value || '').trim().toLowerCase() === needle) {
+          return row
+        }
+      }
+    }
+    return null
+  }
+
+  function findMenuItemsByKeyword(keyword) {
+    if (!keyword) return []
+    const k = String(keyword).trim().toLowerCase()
+    const matches = []
+    for (const row of liveData.menu || []) {
+      for (const value of Object.values(row || {})) {
+        if (String(value || '').toLowerCase().includes(k)) {
+          matches.push(row)
+          break
+        }
+      }
+    }
+    return matches
+  }
+
+  function getMenuItemName(row) {
+    if (!row || typeof row !== 'object') return ''
+    const nameKeys = ['name', 'item', 'title', 'dish', 'menu_item', 'menuitem']
+    for (const k of nameKeys) {
+      if (k in row && String(row[k] || '').trim()) return String(row[k]).trim()
+    }
+    // fallback to first non-empty value
+    for (const v of Object.values(row || {})) {
+      if (String(v || '').trim()) return String(v).trim()
+    }
+    return ''
+  }
+
+  function findMenuItemsByCuisine(cuisine) {
+    if (!cuisine) return []
+
+    // broaden matching with known synonyms and fuzzy contains
+    const synonyms = {
+      indian: ['indian', 'north indian', 'south indian', 'tandoori', 'masala', 'curry', 'butter chicken'],
+      'south indian': ['south indian', 'southindian', 'dosa', 'idli', 'sambar', 'vada', 'chettinad', 'andhra', 'kerala'],
+      italian: ['italian', 'pizza', 'pasta', 'risotto', 'carbonara', 'margherita'],
+      chinese: ['chinese', 'szechuan', 'sichuan', 'cantonese', 'dimsum', 'manchurian', 'hakka'],
+      thai: ['thai', 'pad thai', 'green curry'],
+      japanese: ['japanese', 'sushi', 'ramen', 'udon', 'tempura'],
+      mediterranean: ['mediterranean', 'greek', 'mezze'],
+    }
+
+    function fuzzyMatchText(text, tokens) {
+      if (!text) return false
+      const t = String(text).toLowerCase()
+      for (const tok of tokens) {
+        if (t.includes(tok)) return true
+      }
+      return false
+    }
+
+    const c = String(cuisine).trim().toLowerCase()
+    const tokens = synonyms[c] || [c]
+    const matches = []
+
+    for (const row of liveData.menu || []) {
+      for (const [k, v] of Object.entries(row || {})) {
+        const key = String(k).toLowerCase()
+        const val = String(v || '').toLowerCase()
+
+        // check cuisine-like keys first
+        if (key.includes('cuisine') || key.includes('cuis') || key.includes('category') || key.includes('tags') || key.includes('style')) {
+          if (fuzzyMatchText(val, tokens)) {
+            matches.push(row)
+            break
+          }
+        }
+
+        // check any field for token presence
+        if (fuzzyMatchText(val, tokens)) {
+          matches.push(row)
+          break
+        }
+      }
+    }
+
+    return matches
+  }
+
+  // Basic question parsing
+  const custIdMatch = question.match(/\b(C\d{1,6})\b/i)
+  const asksCuisine = /cuisine|preference|what (do they )?like|recommend/i.test(question)
+  const cuisineMatch = question.match(/\b(indian|italian|south ?indian|chinese|thai|japanese|mediterranean|greek)\b/i)
+  const asksVegetarian = /vegetarian|veg\b|vegan|plant[- ]?based|veggie|no meat/i.test(question)
+  const asksMenu = /menu|menu items|which menu items|which dishes|items are/i.test(question)
+
+  let reply = ''
+
+  // Customer-specific queries
+  if (custIdMatch && asksCuisine) {
+    const cid = custIdMatch[1]
+    const customer = findCustomerById(cid)
+    if (customer) {
+      // try to find a cuisine-like field
+      const keys = Object.keys(customer)
+      let cuisine = ''
+      for (const key of keys) {
+        if (/cuisine|food|preference|pref/i.test(key)) {
+          cuisine = String(customer[key] || '').trim()
+          if (cuisine) break
+        }
+      }
+
+      if (cuisine) {
+        reply = `${cid}'s preferred cuisine is ${cuisine}.`
+      } else {
+        reply = "I couldn't find that information in the available TasteMate data."
+      }
+    } else {
+      reply = "I couldn't find that information in the available TasteMate data."
+    }
+  } else if (asksVegetarian || (asksMenu && asksVegetarian)) {
+    // Find vegetarian menu items by searching menu rows for 'vegetarian' or dietary tags
+    const vegItems = []
+    for (const row of liveData.menu || []) {
+      // check obvious fields
+      for (const [k, v] of Object.entries(row || {})) {
+        const key = String(k).toLowerCase()
+        const val = String(v || '').toLowerCase()
+        if (key.includes('diet') || key.includes('tags') || key.includes('labels') || key.includes('category')) {
+          if (val.includes('vegetarian') || val.includes('veg') || val.includes('vegan')) {
+            vegItems.push(row)
+            break
+          }
+        }
+        if (val.includes('vegetarian') || val.includes('veg') || val.includes('vegan')) {
+          vegItems.push(row)
+          break
+        }
+      }
+    }
+
+    if (vegItems.length > 0) {
+      const names = vegItems.map((r) => getMenuItemName(r)).filter(Boolean).slice(0, 10)
+      reply = `Sure — here are some vegetarian choices I can see: ${names.join(', ')}.`
+    } else {
+      reply = "I couldn't find that information in the available TasteMate data. Try asking in a different way (for example, 'Which items are plant-based?' or 'Show veggie options')."
+    }
+  } else if (cuisineMatch) {
+    // User asked about a specific cuisine
+    const cuisine = cuisineMatch[1]
+    const items = findMenuItemsByCuisine(cuisine)
+    if (items.length > 0) {
+      const names = items.map((r) => getMenuItemName(r)).filter(Boolean).slice(0, 12)
+      reply = `Nice choice — here are some ${cuisine} dishes I can find: ${names.join(', ')}.`
+    } else if (Array.isArray(snapshot.topMenuItems) && snapshot.topMenuItems.length > 0) {
+      reply = `I don't see many labelled ${cuisine} dishes, but top menu items right now include: ${snapshot.topMenuItems.slice(0, 6).join(', ')}.`
+    } else {
+      reply = "I couldn't find that information in the available TasteMate data. You can also try broader terms like 'Indian' or 'Asian' to see related items."
+    }
+  } else if (asksMenu) {
+    // Generic menu query — return top menu items from snapshot if present
+    if (Array.isArray(snapshot.topMenuItems) && snapshot.topMenuItems.length > 0) {
+      reply = `Here are some popular items in the live data: ${snapshot.topMenuItems.slice(0, 6).join(', ')}.`
+    } else {
+      reply = "I couldn't find that information in the available TasteMate data."
+    }
+  } else {
+    // For any other question, do not invent answers — point to live snapshot
+    reply = "I couldn't find that information in the available TasteMate data. You can ask me for recommendations by cuisine (for example, 'Recommend Italian dishes'), dietary filters (like 'vegetarian' or 'plant-based'), or ask for popular items."
   }
 
   return {
     agent: chatbotMetadata.name,
     role: chatbotMetadata.role,
     generatedAt: new Date().toISOString(),
-    modelUsed,
+    modelUsed: 'data-only',
     toolName,
     question,
     reply,
     suggestedFollowUps: [
-      'What should the next agent focus on?',
-      'Which live signals matter most right now?',
-      'Turn this into a customer-facing launch idea.',
+      'Which customers match this preference?',
+      'Show vegetarian menu items',
+      'Give me the top menu items you see',
     ],
     mcpSnapshot: snapshot,
   }
