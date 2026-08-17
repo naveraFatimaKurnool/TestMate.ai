@@ -448,10 +448,8 @@ function App() {
         </div>
 
         <nav className="site-nav">
-          <a href="#">Dashboard</a>
-          <a href="#how">How it works</a>
-          <a href="#docs">Docs</a>
-          <button className="ghost" onClick={() => window.scrollTo(0, document.body.scrollHeight)}>AI Chat</button>
+          <span className="site-title">TasteMate AI</span>
+          <button className="chat-cta" onClick={() => { const el = document.querySelector('.chat-input'); if (el) { el.focus(); window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - 80, behavior: 'smooth' }); } }}>Chat with Nora</button>
         </nav>
       </header>
       {/* =========================================================

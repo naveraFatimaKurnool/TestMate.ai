@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="800" viewBox="0 0 1200 800">
+  <defs>
+    <linearGradient id="g8" x1="0" x2="1"><stop offset="0" stop-color="#fff1e6"/><stop offset="1" stop-color="#ffe1b3"/></linearGradient>
+  </defs>
+  <rect width="100%" height="100%" fill="#fff8f2"/>
+  <rect x="40" y="40" width="1120" height="720" rx="20" fill="url(#g8)"/>
+  <text x="80" y="140" font-family="Arial" font-size="48" fill="#a65a1b">Smoked Ribs</text>
+  <text x="80" y="200" font-family="Arial" font-size="22" fill="#8a4a1a">Slow-smoked ribs with tangy glaze</text>
+</svg>

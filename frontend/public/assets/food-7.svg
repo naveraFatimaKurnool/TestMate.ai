@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="800" viewBox="0 0 1200 800">
+  <defs>
+    <linearGradient id="g7" x1="0" x2="1"><stop offset="0" stop-color="#e8f0ff"/><stop offset="1" stop-color="#d6e3ff"/></linearGradient>
+  </defs>
+  <rect width="100%" height="100%" fill="#f7fbff"/>
+  <rect x="40" y="40" width="1120" height="720" rx="20" fill="url(#g7)"/>
+  <text x="80" y="140" font-family="Arial" font-size="48" fill="#214aee">Seafood Platter</text>
+  <text x="80" y="200" font-family="Arial" font-size="22" fill="#214aee">A selection of local seafood hits</text>
+</svg>
