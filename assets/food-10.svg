@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="800" viewBox="0 0 1200 800">
+  <defs>
+    <linearGradient id="g10" x1="0" x2="1"><stop offset="0" stop-color="#fff5f0"/><stop offset="1" stop-color="#ffe9e0"/></linearGradient>
+  </defs>
+  <rect width="100%" height="100%" fill="#fff9f6"/>
+  <rect x="40" y="40" width="1120" height="720" rx="20" fill="url(#g10)"/>
+  <text x="80" y="140" font-family="Arial" font-size="48" fill="#a83b2b">Street Tacos</text>
+  <text x="80" y="200" font-family="Arial" font-size="22" fill="#7a2f22">Charred corn tortillas, salsa verde</text>
+</svg>

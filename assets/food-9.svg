@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="800" viewBox="0 0 1200 800">
+  <defs>
+    <linearGradient id="g9" x1="0" x2="1"><stop offset="0" stop-color="#eef7ff"/><stop offset="1" stop-color="#dfefff"/></linearGradient>
+  </defs>
+  <rect width="100%" height="100%" fill="#fbfeff"/>
+  <rect x="40" y="40" width="1120" height="720" rx="20" fill="url(#g9)"/>
+  <text x="80" y="140" font-family="Arial" font-size="48" fill="#1f4aa3">Ocean Bowl</text>
+  <text x="80" y="200" font-family="Arial" font-size="22" fill="#1b3f8a">Sea greens, poke-style salmon</text>
+</svg>
